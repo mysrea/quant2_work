@@ -109,7 +109,7 @@ m2 <- lm(g4math ~ small, data=star)
 modelsummary(m2, vcov="robust", stars=TRUE)
 # The coefficient of 'small' against g4math is 0.591 which would suggest that a smaller class size does improve math scores, but to a much smaller degree than for reading scores.
 
-## 2.3
+##2.3
 m3 <- lm(g4reading ~ small+race+yearssmall, data=star)
 modelsummary(m3, vcov="robust", stars=TRUE)
 # The results are quite different from the first model.
@@ -117,7 +117,19 @@ modelsummary(m3, vcov="robust", stars=TRUE)
 # The randomization seems imperfect as such a different coefficient once controls are added would imply an omitted variable bias.
 # Yearssmall is how many years a student spent in a small class. A coefficient of 2.074 would suggest that a student's score would increase by about 2 for each year they spent in a smaller class.
 
+##2.4
 m4 <- lm(g4reading ~ small * race + yearssmall, data = star)
 modelsummary(m4, vcov="robust", stars=TRUE)
 broom::tidy(m4)
 # The coefficient estimate for small x race is 11.3 with a standard error of 5.47 & a robust standard error of 10.4, and it is not marked as statistically significant.
+751.069+11.299 #=762.368 for White students
+751.069+(11.299*2) #=773.667 for Black students
+# This would suggest that a smaller class size is more beneficial for different races.
+# This is not substantively valuable as (1) it does not account for mixed races and (2) it assigns an ordering of races which suggests that, for example, those of an Other race will always have a score higher than those of a Native American race. 
+# Additionally: the interaction term is not statistically significant (nor is the 'small' coefficient by itself).
+# The R2 & the R2 adjusted are also very low, suggesting that this model is a poor fit.
+# If the randomization was not properly done, as I suggested from the previous addition of controls, then there could still be omitted variable bias.
+
+##2.5
+modelsummary(list(m1,m3,m4), vcov="robust", stars=TRUE)
+
