@@ -72,6 +72,8 @@ ggsave("a2modelp1.png",plot=get_last_plot())
 ##1.8, extra
 # Standardizing variables, using substantive knowledge/background knowledge, previous research
 
+#######################################
+
 ##2.1
 star <- read.csv("https://raw.githubusercontent.com/franvillamil/AQM2/refs/heads/master/datasets/star.csv")
 
@@ -98,28 +100,28 @@ aggregate(star$g4reading, list(star$classtype), FUN=mean, na.rm=TRUE)
 # Small = 723, regular = 719, small+aide = 720
 # The small class scored the highest.
 
-m1 <- lm(g4reading ~ small, data=star)
-modelsummary(m1, vcov="robust", stars=TRUE)
+m12 <- lm(g4reading ~ small, data=star)
+modelsummary(m12, vcov="robust", stars=TRUE)
 # The coefficient of 'small' is 3.1, which would suggest that a smaller class size increases the reading test score by about 3 points.
 
 723.3912-720.7155
 # Result is 2.6757 which is relatively close to 3.1.
 
-m2 <- lm(g4math ~ small, data=star)
-modelsummary(m2, vcov="robust", stars=TRUE)
+m22 <- lm(g4math ~ small, data=star)
+modelsummary(m22, vcov="robust", stars=TRUE)
 # The coefficient of 'small' against g4math is 0.591 which would suggest that a smaller class size does improve math scores, but to a much smaller degree than for reading scores.
 
 ##2.3
-m3 <- lm(g4reading ~ small+race+yearssmall, data=star)
-modelsummary(m3, vcov="robust", stars=TRUE)
+m32 <- lm(g4reading ~ small+race+yearssmall, data=star)
+modelsummary(m32, vcov="robust", stars=TRUE)
 # The results are quite different from the first model.
 # This model suggests that a smaller class size would reduce the score of a student by about 6 points.
 # The randomization seems imperfect as such a different coefficient once controls are added would imply an omitted variable bias.
 # Yearssmall is how many years a student spent in a small class. A coefficient of 2.074 would suggest that a student's score would increase by about 2 for each year they spent in a smaller class.
 
 ##2.4
-m4 <- lm(g4reading ~ small * race + yearssmall, data = star)
-modelsummary(m4, vcov="robust", stars=TRUE)
+m42 <- lm(g4reading ~ small * race + yearssmall, data = star)
+modelsummary(m42, vcov="robust", stars=TRUE)
 broom::tidy(m4)
 # The coefficient estimate for small x race is 11.3 with a standard error of 5.47 & a robust standard error of 10.4, and it is not marked as statistically significant.
 751.069+11.299 #=762.368 for White students
@@ -131,5 +133,8 @@ broom::tidy(m4)
 # If the randomization was not properly done, as I suggested from the previous addition of controls, then there could still be omitted variable bias.
 
 ##2.5
-modelsummary(list(m1,m3,m4), vcov="robust", stars=TRUE)
+modelsummary(list(m12,m32,m42), vcov="robust", stars=TRUE, output="readingmodels.html")
+modelplot(list(m12,m32,m42), vcov = "robust")
+ggsave("a2modelp2.png",plot=get_last_plot())
+
 
