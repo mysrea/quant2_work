@@ -137,4 +137,11 @@ modelsummary(list(m12,m32,m42), vcov="robust", stars=TRUE, output="readingmodels
 modelplot(list(m12,m32,m42), vcov = "robust")
 ggsave("a2modelp2.png",plot=get_last_plot())
 
+##2.6
+#>In the first model, just a small class size has a small positive effect for reading, whereas it has a noticeably larger negative effect in the second and third models when more controls are added; each year in a small classroom is noted to have a small positive effect on the reading score.
+#This would suggest to me that class size alone is not a determining factor in test scores, but that perhaps extended time spent in a smaller class size is what is truly beneficial. It's clear there are many variables at play, though. 
+#>I'm unfamiliar with typical observational studies of class size, but what I can see the benefit of this study being is that each individual's score was analyzed instead of it just being a classwide average.
+#It is also beneficial to note how many years a student spent in a classroom since that, it seems, has a different effect on student scores than just the general notion that they have, at some point, spent time in a small class.
+#>As for caveats, I will mention what I have brought up in previous answers: none of the variables except for race are noted as statistically significant, the randomization seems imperfect, evaluating race in a structured order seems analytically problematic, + R2 & the R2 adjusted are very low.
 
+#Miles Young Schroeder
