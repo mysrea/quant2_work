@@ -75,7 +75,7 @@ ggsave("a2modelp1.png",plot=get_last_plot())
 #######################################
 
 ##2.1
-star <- read.csv("https://raw.githubusercontent.com/franvillamil/AQM2/refs/heads/master/datasets/star.csv")
+star <- read.csv("https://raw.githubusercontent.com/franvillamil/AQM2/refs/heads/master/datasets/star/star.csv")
 
 classcol <- c("Small", "Regular", "Regular+Aide")
 classfac <- factor(classcol, levels=c("Small", "Regular", "Regular+Aide"))
@@ -97,7 +97,7 @@ broom::tidy(star)
 
 ##2.2
 aggregate(star$g4reading, list(star$classtype), FUN=mean, na.rm=TRUE)
-# Small = 723, regular = 719, small+aide = 720
+# Small = 723, regular = 719, regular+aide = 720
 # The small class scored the highest.
 
 m12 <- lm(g4reading ~ small, data=star)
