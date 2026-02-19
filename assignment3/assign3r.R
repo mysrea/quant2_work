@@ -1,5 +1,6 @@
 library(tidyverse)
 library(modelsummary)
+library(marginaleffects)
 
 raw <- read.csv("https://raw.githubusercontent.com/franvillamil/AQM2/refs/heads/master/datasets/anes/anes_timeseries_2020.csv")
 
@@ -24,8 +25,9 @@ df = raw %>%
 
 #b)
 summary(df)
-df = na.omit(df) 
-nrow(df) ## from 8280 -> 6733
+#df <- subset(df, !is.na(income))
+df = na.omit(df)
+
 
 #c)
 summary(df$voted==1)
@@ -34,8 +36,59 @@ summary(df$voted==1)
 summary(df)
 
 ##1.2
-factor(df$education)
-#levels=10,12,14,16,20
+turnout_by_edu = df %>%
+  group_by(education) %>%
+  summarise(turnout=mean(voted))
 
-ggplot(df, aes(x=education, y=voted)) + 
-  geom_bar(stat = "identity")
+ggplot(turnout_by_edu, aes(x = factor(education), y = turnout)) +
+  geom_col() +
+  labs(x = "Years of education", y = "Turnout rate")
+
+##1.3
+
+lpm1 = lm(voted ~ age + education + income + female, data = df)
+broom::tidy(lpm1)
+# Each year of education increases turnout by 0.0193
+# Each year of education increases turnout probability by 1.9 percentage points
+
+preds_lpm = predict(lpm1)
+sum(preds_lpm<0)
+sum(preds_lpm>1)
+range(preds_lpm)
+
+##1.4
+log1 = glm(voted ~ age + education + income + female,
+            family = binomial, data = df)
+summary(log1)
+broom::tidy(log1)
+#rough estimate is exp
+#divide estimate by standard error to determine statistical significance, it's in a good percentile if it is above 1.96
+-4.05/0.266
+
+#specific predicting
+nd = data.frame(age=c(25,50),education=c(10,10),
+                income=rep(20,2),female=rep(1,2))
+predict(log1, newdata=nd,type="response")
+
+exp(coef(log1))
+# An odds ratio higher than one means there is a positive multiplicative change; more education, more turnout.
+
+preds_logit = predict(log1, type = "response")
+range(preds_logit)
+#Between 0.25-0.99 are between 0 to 1
+
+##1.5, comparison
+#marginal effect
+#what is the average effect of 5 more years of education?
+avg_slopes(log1)
+0.023*5 #11.5
+#for the lpm
+0.0193*5 #9.65
+# They are similar predictions; the AMEs are similar to the LPM coefficients
+
+#side by side
+modelsummary(list("LPM" = lpm1, "Logit" = log1),
+             vcov = list("robust", NULL), output = "markdown")
+
+##1.6
+plot_predictions(log1, condition = "education")
