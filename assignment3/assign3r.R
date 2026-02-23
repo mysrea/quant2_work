@@ -58,7 +58,7 @@ range(preds_lpm)
 
 ##1.4
 log1 = glm(voted ~ age + education + income + female,
-            family = binomial, data = df)
+           family = binomial, data = df)
 summary(log1)
 broom::tidy(log1)
 #rough estimate is exp
@@ -90,5 +90,23 @@ avg_slopes(log1)
 modelsummary(list("LPM" = lpm1, "Logit" = log1),
              vcov = list("robust", NULL), output = "markdown")
 
+#interaction
+#education:female -> when you are male, this is what education is
+log2 = glm(voted ~ age + education*female + income,
+           family = binomial, data = df)
+summary(log2)
+log3 = glm(voted ~ age + education*income + female,
+           family = binomial, data = df)
+
+plot_predictions(log3, condition = c("education","income"))
+
+
 ##1.6
 plot_predictions(log1, condition = "education")
+plot_predictions(log1, condition = c("age","female"))
+
+#The male line starts the lowest point, around 0.7, and goes to around 0.95
+#The female line starts around 0.75, and goes to around 0.975
+#The education line starts around 0.75,and goes to around 0.975
+#They all have positive relationships with turnout and have similar patterns
+
