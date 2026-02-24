@@ -209,3 +209,35 @@ predictions(logit2, newdata=sp1,type="response")
 logmodel1<-plot_predictions(logit2, condition = c("yearssmall", "small"))
 ggsave("yearss_small_plot.png", logmodel1, width = 6, height = 4)
 
+
+# 2.5 ---------------------------------------------------------------------
+
+logit3 = glm(hsgrad ~ small * race + yearssmall, family = binomial, data = raw_na)
+summary(logit3)
+avg_slopes(logit3)
+
+# In this model, race is marked as statistically significant and reduces the likelihood of graduation. The AME estimate is -0.06 which suggests a reduction of about 6%.
+
+avg_slopes(logit3, variables = "small", by = "race")
+table(rawst$race)
+table(raw_na$race)
+
+# The estimates do vary, although not all of the race categories are present as estimates for Native American and Hispanic students are not included.
+# For white people, the estimate is small but positive at about 0.2% whereas for students designated as an 'Other' race category, the estimate suggests a -36% change when shifting to a smaller class size.
+
+# This is not especially accurate though because there is only one observation of someone in the 'Other' category and only 5 in the 'Asian' category. There appears to be no complete observations of people who are categorized as Native American or Hispanic. The data is heavily skewed towards white participants. 
+
+
+# 2.6 ---------------------------------------------------------------------
+models <- list(lpm1,lpm2,logit1,logit2)
+modelsummary(models, vcov="robust", stars=TRUE, output="stars_lpmlog.html")
+co_plot_s = modelplot(models, vcov = list("robust",NULL))
+ggsave("coefplot_2_6.png", co_plot_s, width = 6, height = 4)
+
+
+# The coefficients for 'small' are all negative as are the coefficients for 'yearssmall'. The AME estimates are also negative but small. This suggests a reduction in high school graduation rate for smaller class sizes, although the reduction would not be high in magnitude. That being said, neither of these variables are considered statistically significant across the 4 models and the R-squared for the LPMs is very low. 
+# Across the LPMs and the logit models, small class size is negatively associated with graduation rate. They do not have exactly the same coefficients but tell similar stories.
+# Experimental studies are designed in part to remove the effect of confounding factors and to track causality. This experimental design can allow for an understanding of how small class sizes impact people without being concerned with effects like quality of teaching due to the randomization factor theoretically.
+# I will note two important issues that I previously mentioned, though, regarding the lack of diversity in their participant races and how omitted variable bias may still play a role given the shift in coefficients once controls are added. 
+
+# - Miles Young Schroeder
