@@ -102,11 +102,62 @@ plot_predictions(log3, condition = c("education","income"))
 
 
 ##1.6
-plot_predictions(log1, condition = "education")
-plot_predictions(log1, condition = c("age","female"))
+edu_plot <- plot_predictions(log1, condition = "education")
+ggsave("edu_plot.png", edu_plot, width = 6, height = 4)
+fa_plot <- plot_predictions(log1, condition = c("age","female"))
+ggsave("age_gender_plot.png", fa_plot, width = 6, height = 4)
 
-#The male line starts the lowest point, around 0.7, and goes to around 0.95
-#The female line starts around 0.75, and goes to around 0.975
-#The education line starts around 0.75,and goes to around 0.975
-#They all have positive relationships with turnout and have similar patterns
+# The male line starts the lowest point, around 0.7, and goes to around 0.95
+# The female line starts around 0.75, and goes to around 0.975
+# The education line starts around 0.75,and goes to around 0.975
+# They all have positive relationships with turnout and have similar patterns
 
+##1.7
+plot3 = modelplot(list("LPM" = lpm1, "Logit" = log1),
+                       vcov = list("robust", NULL))
+plot3
+ggsave("coefplot_lpm_logit.png", plot3, width = 6, height = 4)
+# They have relatively similar conclusions. Differences matter the most in the cast where rare events are trying to be understood.
+
+#################################
+
+#2.1
+rawst <- read.csv("https://raw.githubusercontent.com/franvillamil/AQM2/refs/heads/master/datasets/star/star.csv")
+
+classcol <- c("Small", "Regular", "Regular+Aide")
+classfac <- factor(classcol, levels=c("Small", "Regular", "Regular+Aide"))
+racecol <- c("White", "Black", "Asian", "Hispanic","Native American", "Other")
+racefac <- factor(racecol, levels=c("White", "Black", "Asian", "Hispanic","Native American", "Other"))
+levels(racefac)
+levels(classfac)
+small <- ifelse(classtype=="Small",1,0)
+
+raw_na <- rawst %>% drop_na()
+summary(rawst)
+summary(raw_na)
+# Observations go from 6325 to 1600.
+
+#hsgrad: graduated from high school (0/1, our outcome)
+table(raw_na$hsgrad)
+#158 did not graduate, 1442 did graduate
+1442/1600
+
+table(raw_na$classtype)
+raw_na %>% count(hsgrad,classtype)
+
+raw_na %>%
+  group_by(classtype) %>%
+  summarise(hsgrad=mean(hsgrad))
+
+
+#There is a 90.1% graduation rate overall.
+#The graduation rates per classtype are similar, with 1=89%, 2=90%, and 3=91.3%. 
+
+#2.2
+raw_na$small <- ifelse(raw_na$classtype ==1,1,0)
+lpm1 = lm(hsgrad ~ small, data = raw_na)
+summary(lpm1) # not statistically sig. -0.016
+logit1 = glm(hsgrad ~ small, family = binomial, data = raw_na)
+summary(logit1) # -0.17
+
+#c
