@@ -1,3 +1,5 @@
+
+# Setup -------------------------------------------------------------------
 library(tidyverse)
 library(modelsummary)
 library(marginaleffects)
@@ -6,6 +8,11 @@ raw <- read.csv("https://raw.githubusercontent.com/franvillamil/AQM2/refs/heads/
 
 ##ifelse = always by observation of each row
 ##casewhen=many conditions
+
+
+# In-class ------------------------------------------------------------------
+
+
 
 ##1.1
 #a)
@@ -121,7 +128,10 @@ ggsave("coefplot_lpm_logit.png", plot3, width = 6, height = 4)
 
 #################################
 
-#2.1
+
+# 2.1 ---------------------------------------------------------------------
+
+
 rawst <- read.csv("https://raw.githubusercontent.com/franvillamil/AQM2/refs/heads/master/datasets/star/star.csv")
 
 classcol <- c("Small", "Regular", "Regular+Aide")
@@ -139,7 +149,7 @@ summary(raw_na)
 
 #hsgrad: graduated from high school (0/1, our outcome)
 table(raw_na$hsgrad)
-#158 did not graduate, 1442 did graduate
+# 158 did not graduate, 1442 did graduate
 1442/1600
 
 table(raw_na$classtype)
@@ -150,14 +160,52 @@ raw_na %>%
   summarise(hsgrad=mean(hsgrad))
 
 
-#There is a 90.1% graduation rate overall.
-#The graduation rates per classtype are similar, with 1=89%, 2=90%, and 3=91.3%. 
+# There is a 90.1% graduation rate overall.
+# The graduation rates per class type are similar, with 1=89%, 2=90%, and 3=91.3%. 
 
-#2.2
+
+# 2.2 ---------------------------------------------------------------------
+
 raw_na$small <- ifelse(raw_na$classtype ==1,1,0)
 lpm1 = lm(hsgrad ~ small, data = raw_na)
 summary(lpm1) # not statistically sig. -0.016
+
 logit1 = glm(hsgrad ~ small, family = binomial, data = raw_na)
 summary(logit1) # -0.17
 
-#c
+# The 'small' coefficient represents the change between when a student goes from a regular class size to a smaller class size.
+# Here, as a student goes from a larger to smaller class size, on average fewer students will graduate by about -1.6%
+
+avg_slopes(logit1)
+# The estimate is nearly identical to the LPM coefficient.
+
+# 2.3 ---------------------------------------------------------------------
+
+lpm2 = lm(hsgrad ~ small + race + yearssmall, data = raw_na)
+summary(lpm2)
+# small, -0.009
+
+logit2 = glm(hsgrad ~ small + race + yearssmall, family = binomial, data = raw_na)
+summary(logit2)
+
+# For lpm2: the coefficient for small has decreased compared to the model without controls, from -0.016 to -0.009, and yearssmall has an even lower coefficient. The highest coefficient is -0.078 with the race control variable.
+# With both of the models, the 'small' variable is not statistically significant and with controls it has decreased to less than 1% of an impact on graduation.
+# Given the shift in the estimate, this would suggest improper randomization from omitted variable bias as the estimate shifted by about 0.7 once more controls were added. 
+
+avg_slopes(logit2)
+
+# 'Yearssmall' has an estimate of -0.025 in the logit2 model. The AME estimate is about -0.002 which would suggest a very minimal effect. On average, a one-year increase in time spent with a smaller class would reduce the chance of graduation by roughly 0.2%.
+
+
+# 2.4 ---------------------------------------------------------------------
+
+sp1 = data.frame(race=c(1,2), small=c(1,0), yearssmall=c(3,0))
+
+predictions(logit2, newdata=sp1,type="response")
+
+# For student 1: estimate of 0.902/90.2% and 97.5 CI is 0.932
+# For student 2: estimate of 0.849/84.9% and 97.5 CI is 0.894
+
+logmodel1<-plot_predictions(logit2, condition = c("yearssmall", "small"))
+ggsave("yearss_small_plot.png", logmodel1, width = 6, height = 4)
+
