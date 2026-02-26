@@ -74,6 +74,8 @@ plot_predictions(m1,condition="undp_gdp")
 plot_predictions(m2,condition="undp_gdp")
 plot_predictions(m3,condition="undp_gdp")
 
+plot(m1)
+
 ##1.5
 
 # The R-squared is highest for the quadratic model
@@ -84,12 +86,49 @@ avg_slopes(m2,variables="undp_gdp")
 
 slopes(m3, variables = "undp_gdp",
        newdata = datagrid(undp_gdp = c(2000, 10000, 30000)))
+
 #estimate decreases with a higher GDP, going from 0.0002 @ 2k to 0.001 @ 30k; the effect diminishes
 
 ##1.6
-p1 = plot_predictions(m1,condition="undp_gdp")
+p1 = plot_predictions(m2,condition="undp_gdp")
 p2 = plot_predictions(m3,condition="undp_gdp")
 ggsave("prediction_plot_a3rp1.png",p1,width=6,height=4)
 ggsave("prediction_plot_a3rp2.png",p2,width=6,height=4)
+p1
+p2
+# They both increase at the beginning and then have diminishing returns
 
+##1.7
+m1_aug = broom::augment(m1)
 
+ggplot(m1_aug,aes(x=.fitted,y=.resid))+
+  geom_point()+
+  geom_hline(yintercept=0,linetype="dashed")+
+  labs(x="Fittedvalues",y="Residuals",title="ResidualsvsFitted:Level-Level(m1)")
+m2_aug=broom::augment(m2)
+ggplot(m2_aug,aes(x=.fitted,y=.resid))+
+  geom_point()+
+  geom_hline(yintercept=0,linetype="dashed")+
+  labs(x="Fittedvalues",y="Residuals",title="ResidualsvsFitted:Level-Log(m2)")
+
+# log improves, less skewed; spread of residuals becoming less frequent as values increase indicates hetero
+
+n=nrow(corn)
+threshold=4/n
+cooks_d=cooks.distance(m2)
+influential=which(cooks_d>threshold)
+corn$cname[influential]
+plot(m2,which=4)
+# don't automatically remove influential observations, look at them individually and assess how they were collected, etc. robustness checks - compare coefficients if the influential observations are removed
+
+##1.8
+
+modelsummary(
+  list("Level-Level"=m1,"Level-Log"=m2,"Quadratic"=m3),
+  vcov="robust",
+  stars=TRUE,
+  gof_map=c("r.squared","nobs"),
+  output="markdown")
+
+#model 3: highest r2, best residual diagnostics, clear substantive interpretation
+# diminishing returns
