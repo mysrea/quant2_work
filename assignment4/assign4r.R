@@ -65,7 +65,31 @@ coef(m2)["log(undp_gdp)"]*log(2)
 
 m3 = lm(ti_cpi~undp_gdp + I(undp_gdp^2), data=corn)
 summary(m3)
+broom::tidy(m3)
 
 models_r4 <- list(m1,m2,m3)
 modelsummary(models_r4, vcov="robust", stars=TRUE)
+
+plot_predictions(m1,condition="undp_gdp")
+plot_predictions(m2,condition="undp_gdp")
+plot_predictions(m3,condition="undp_gdp")
+
+##1.5
+
 # The R-squared is highest for the quadratic model
+
+avg_slopes(m2,variables="undp_gdp")
+#AME = 0.00524 ; the corruption increases by 0.00524 for a small increase in PPP. Average slopes
+#it differs from the raw coefficient because it is an average over all of the observed values; average predicted change in the corruption index across all countries in the sample for a 1-dollar increase
+
+slopes(m3, variables = "undp_gdp",
+       newdata = datagrid(undp_gdp = c(2000, 10000, 30000)))
+#estimate decreases with a higher GDP, going from 0.0002 @ 2k to 0.001 @ 30k; the effect diminishes
+
+##1.6
+p1 = plot_predictions(m1,condition="undp_gdp")
+p2 = plot_predictions(m3,condition="undp_gdp")
+ggsave("prediction_plot_a3rp1.png",p1,width=6,height=4)
+ggsave("prediction_plot_a3rp2.png",p2,width=6,height=4)
+
+
