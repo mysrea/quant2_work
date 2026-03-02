@@ -132,3 +132,69 @@ modelsummary(
 
 #model 3: highest r2, best residual diagnostics, clear substantive interpretation
 # diminishing returns
+
+################################################
+
+
+# 2.1 ---------------------------------------------------------------------
+
+inmo <- read_dta("infantmortality.dta")
+summary(inmo)
+
+# There are 101 countries.
+
+pl1 <- ggplot(inmo, aes(x=infant)) + 
+  geom_histogram()
+pl2 <- ggplot(inmo, aes(x=income)) + 
+  geom_histogram()
+
+pl1
+pl2
+
+# Both of them are skewed towards the left.
+
+ggplot(inmo,aes(x=infant,y=income, color=region))+
+  geom_point()
+
+# The plot is skewed towards the left, suggesting that a higher per-capita income leads to lower infant mortality. The Africa region generally has the lowest income and higher infant mortality, although there are some outliers visible. It does not look like a linear relationship.
+
+ggplot(inmo,aes(x=log(infant),y=log(income), color=region))+
+  geom_point()
+  
+# The plot appears much more linear and suggests a relationship wherein log(infant) increases as log(income) decreases.
+
+
+# 2.2 ---------------------------------------------------------------------
+
+mo1 = lm(infant ~ income, data = inmo)
+mo2 = lm(log(infant) ~ log(income), data = inmo)
+broom::tidy(mo1)
+broom::tidy(mo2)
+
+predictions(mo1, newdata=datagrid(income=c(0)))
+predictions(mo1, newdata=datagrid(income=c(1000)))
+110-89.5
+
+# A $1000 increase in per-capita income decreases the infant mortality rate by about 20.5 percentage points.
+
+# Elasticity describes how much a variable reacts as another variable shifts, and the coefficient of logX is referred to as an elasticity.
+# In m2, the income's elasticity is -0.512. A 1% change in income will lead to a -0.512% change in infant mortality.
+
+mo1_aug=broom::augment(mo1)
+ggplot(mo1_aug,aes(x=.fitted,y=.resid))+
+  geom_point()+
+  geom_hline(yintercept=0,linetype="dashed")+
+  labs(x="Fittedvalues",y="Residuals",title="ResidualsvsFitted:Level-Level(mo1)")
+
+mo2_aug=broom::augment(mo2)
+ggplot(mo2_aug,aes(x=.fitted,y=.resid))+
+  geom_point()+
+  geom_hline(yintercept=0,linetype="dashed")+
+  labs(x="Fittedvalues",y="Residuals",title="ResidualsvsFitted:Log-Log(mo2)")
+
+# The level-level model is skewed heavily towards the right whereas the log-log model is distributed across the plot. The level-level model has many more datapoints below 0 rather than above, creating a curve. The log-log model is less curved which indicates a lack of heteroskedasticity. Therefore, the log-log model is a better fit.
+
+
+# 2.3 ---------------------------------------------------------------------
+
+
