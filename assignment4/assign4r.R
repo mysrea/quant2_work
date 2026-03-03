@@ -215,4 +215,13 @@ avg_slopes(mo3)
 
 # 2.4 ---------------------------------------------------------------------
 
+mo4 = lm(log(infant) ~ log(income) * oil + region, data = inmo)
+broom::tidy(mo4)
+avg_slopes(mo4, variables = "income", by = "oil")
 
+
+# The marginal effect of income is negative for countries who do not export oil and positive for those who do; meaning, an oil-exporting country increases the infant mortality rate while a non-oil exporting country decreases the infant mortality rate.
+# A possibile explanation is that an oil-exporting country that values profit and income growth over pollution standards could have worse health outcomes.
+
+mo4plot <- plot_slopes(mo4, variables = "income", condition = "oil")
+ggsave("mo4plot.png", mo4plot, width = 6, height = 4)
