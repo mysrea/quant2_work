@@ -197,4 +197,10 @@ ggplot(mo2_aug,aes(x=.fitted,y=.resid))+
 
 # 2.3 ---------------------------------------------------------------------
 
+mo3 = lm(log(infant) ~ log(income) + region + oil, data = inmo)
+broom::tidy(mo3)
+0.512-0.34
 
+# The income estimate for model 2 was -0.512 and it is -0.340 for model 3 which is a 0.172 point change
+
+print(mo3) # Africa not reported?
