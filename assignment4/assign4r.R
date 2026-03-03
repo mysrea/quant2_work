@@ -225,3 +225,32 @@ avg_slopes(mo4, variables = "income", by = "oil")
 
 mo4plot <- plot_slopes(mo4, variables = "income", condition = "oil")
 ggsave("mo4plot.png", mo4plot, width = 6, height = 4)
+
+
+# 2.5 ---------------------------------------------------------------------
+
+pred3<-predictions(mo3,
+            newdata = datagrid(
+              income = c(1000, 20000, 10000),
+              region = c("Africa", "Europe", "Americas"),
+              oil = c("no", "no", "yes")))
+pred3
+exp(pred3$estimate)
+
+# Africa, no/yes: 67/127. 30/58. 24/45.
+# Americas, no/yes: 38/73. 17/33. 13/26.
+# Europe, no/yes: 23/45. 10/20. 8/16.
+
+67-23
+30-10
+58-20
+24-8
+45-16
+
+# This prediction would suggest that there is a 127% infant mortality rate for oil-exporting countries in Africa which is impossible. 
+# Asides from this: there is a 16-44 point difference between the (plausible) African and European estimates. 
+
+
+# 2.6 ---------------------------------------------------------------------
+
+
