@@ -201,6 +201,18 @@ mo3 = lm(log(infant) ~ log(income) + region + oil, data = inmo)
 broom::tidy(mo3)
 0.512-0.34
 
-# The income estimate for model 2 was -0.512 and it is -0.340 for model 3 which is a 0.172 point change
+# The income estimate for model 2 was -0.512 and it is -0.340 for model 3 which is a 0.172 point change.
 
-print(mo3) # Africa not reported?
+plot_predictions(mo3, condition = "region")
+summary(mo3)
+
+# Africa is not individually reported; as such it is the reference category. Since all of the regions have negative estimates, this means that the Africa estimate would be the highest. This can be seen by plotting the predictions, where the Africa region clearly has the largest infant mortality rate at about 4.2% compared to the Americas as about 3.6%.
+
+avg_slopes(mo3)
+
+# The AME estimate is -0.00159 for income. 
+
+
+# 2.4 ---------------------------------------------------------------------
+
+
