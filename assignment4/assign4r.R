@@ -259,5 +259,38 @@ ppmo3 = ppmo3 + ggplot2::labs(x = "Per-capita income",
                               title="Predicted infant mortality across income levels",
                               subtitle="Separated by region")
 ppmo3 = ppmo3 + guides(fill = "none")
+ppmo3 = ppmo3 + theme_minimal()
 ppmo3
 ggsave("mo3_prediction_plot.png", ppmo3, width = 6, height = 4)
+
+# This plot suggests that a higher per-capita income decreases the infant mortality rate overall. The separation by region shows that Africa has the highest overall infant mortality rate, with Europe.
+# The first caveat/limitation that comes to mind may be the distribution of incomes and availability of data. Do we have enough high-income areas across the data for these findings to be robust?
+# Another caveat is these regions have different climates and natural environments. The physical environment, like distinctly high temperatures, could be less suited for a child's development regardless of income level. Not properly taking this into account could be removing an important insight into the infant mortality rate.
+
+# 2.7 ---------------------------------------------------------------------
+
+plot(mo3, which=1)
+
+# The Residuals vs Fitted plot does not show a funnel shape which means heteroskedasticity is not indicated.
+
+modelsummary(list("Level" = mo1,
+                  "Log-Log" = mo2,
+                  "Controls" = mo3,
+                  "Interaction" = mo4),
+             vcov = "robust",
+             stars = TRUE,
+             gof_map = c("r.squared", "nobs"))
+
+# mo3 vcov = 0.398, 0.078, 0.184
+
+modelsummary(list("Level" = mo1,
+                  "Log-Log" = mo2,
+                  "Controls" = mo3,
+                  "Interaction" = mo4),
+             stars = TRUE,
+             gof_map = c("r.squared", "nobs"))
+
+# mo3 not robust = 0.350, 0.067, 0.184
+
+# The standard errors are similar, but robust standard errors are important to use because they account for the possibility of heteroskedasticity. The results here indicate that the data is homoskedastic since the robust standard errors approximately align with the classic standard errors.
+
