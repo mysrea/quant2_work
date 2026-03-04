@@ -5,7 +5,6 @@ library(modelsummary)
 library(marginaleffects)
 library(haven)
 
-
 # Classwork ---------------------------------------------------------------
 
 ##1.1
@@ -248,9 +247,17 @@ exp(pred3$estimate)
 45-16
 
 # This prediction would suggest that there is a 127% infant mortality rate for oil-exporting countries in Africa which is impossible. 
-# Asides from this: there is a 16-44 point difference between the (plausible) African and European estimates. 
+# Asides from this: there is a 16-44 point difference between the (plausible) African and European estimates. This indicates a significant gap between the survival rate of an infant between the continents on average.
 
 
 # 2.6 ---------------------------------------------------------------------
 
-
+ppmo3 = plot_predictions(mo3, condition = c("income", "region"), draw=TRUE)
+ppmo3 = ppmo3 + ggplot2::labs(x = "Per-capita income",
+                              y = "Infant mortality rate",
+                              color="Regions",
+                              title="Predicted infant mortality across income levels",
+                              subtitle="Separated by region")
+ppmo3 = ppmo3 + guides(fill = "none")
+ppmo3
+ggsave("mo3_prediction_plot.png", ppmo3, width = 6, height = 4)
