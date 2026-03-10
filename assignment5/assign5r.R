@@ -6,6 +6,7 @@ library(modelsummary)
 library(marginaleffects)
 library(haven)
 library(fixest)
+library(plm)
 
 # Classwork ---------------------------------------------------------------
 
@@ -83,7 +84,7 @@ modelsummary(list("Pooled OLS" = mpooled,
 # Controlling for time & unit: one unit increase in unemployment (1%) decreases presidential approval by -1.4% 
 # Two-way fixed effects accounts for common shocks; across time & the net of common trends. 'removing' the effect of common shocks shifts the coefficient.
 
-#---- 
+
 #note: factoring a variable = makes it categorical
 #factoring in a regression formula includes a dummy variable that creates a reference category
 
@@ -94,4 +95,56 @@ modelsummary(list("Pooled OLS" = mpooled,
 
 # 2.1 ---------------------------------------------------------------------
 
+df <- read_dta("teaching_evals.dta")
 
+n_distinct(df$InstrID) # 48
+n_distinct(df$CourseID) # 254
+n_distinct(df$Year) # 9
+
+254/48 # = 5.29
+
+# There are about 5.3 courses for each professor.
+# There are 9 years that are accounted for; each observation is an individual-time pair so it is a 'long' panel.
+
+
+# 2.2 ---------------------------------------------------------------------
+
+m1 = lm(Eval ~ Apct + Enrollment + Required, data = df)
+broom::tidy(m1)
+modelsummary(m1, stars = TRUE)
+
+# A one point increase in the share of A grades (going from 0 students to all students) increases the teacher's evaluation score by .359 points.
+
+# Instructors may be genuinely good at teaching which would improve student ability and students may show their appreciation for this in their scores.
+# Instructors may be generally kind and give their students higher scores, and this general kindness could be why students give them a higher evaluation.
+# These examples would make it seem like the evaluations and grading generosity were closer in connection than they may be in reality.
+
+
+# 2.3 ---------------------------------------------------------------------
+
+m_instr = feols(Eval ~ Apct + Enrollment + Required | InstrID, data = df)
+m_twfe = feols(Eval ~ Apct + Enrollment + Required | InstrID + Year, data = df)
+
+modelsummary(list("Pooled OLS" = m1, "Instructor FE" = m_instr, "Two-Way FE" = m_twfe),
+             vcov = ~InstrID,
+             stars = TRUE,
+             gof_map = c("r.squared", "nobs"),
+             coef_rename = c("Apct" = "% with an A"))
+
+# The instructor fixed effect is controlling for teachers' characteristics that do not change over time & across the different classes they may teach.
+# The coefficient for both of the fixed effects models are slightly lower. There suggests a lower correlation between the amount of students with an A and their evaluation. The pooled OLS overestimates this correlation, meaning that the unobsereved characteristics of teachers do play a part in evaluations. 
+
+
+# 2.4 ---------------------------------------------------------------------
+pdata = pdata.frame(df, index = c("InstrID", "CourseID"))
+m_re = plm(Eval ~ Apct + Enrollment + Required,
+           data = pdata, model = "random")
+
+m_fe_plm = plm(Eval ~ Apct + Enrollment + Required,
+               data = pdata, model = "within")
+phtest(m_fe_plm, m_re)
+
+# The null hypothesis would be that there is not a correlation between the unit effects and the regressors. Under the null hypothesis, both models would be consistent. The Hausman test result is that one model is inconsistent. The p-value is over 0.05, so Random effects or Fixed effects are both valid to use.  
+# The previous section's results suggested that accounting for teachers' consistent characteristics changed the result. Fixed effects account for similarities over time. There are certain to be qualities of a teacher whom would stay consistent over the years of teaching and would not randomly vary. Since fixed effects were not discounted from being used in the Hausman test, there are logically examples of fixed effects which could be taken into account, and FE is generally more credible, I would err on the side of used fixed effects. 
+
+             
