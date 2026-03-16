@@ -126,4 +126,8 @@ ggsave("teen employment over years.png", mpdt_plot, width=6,height=4)
 
 # 2.2 ---------------------------------------------------------------------
 
+mp_2 <- mpdta
+mp_2 <- mp_2 %>% mutate(treated_post = ifelse(treat > 0 & year >= first.treat, "1", "0"))
 
+
+mof_1 = feols(lemp ~ 
