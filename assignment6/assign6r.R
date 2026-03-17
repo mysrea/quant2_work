@@ -193,3 +193,6 @@ print(oug_plot)
 # Pre-tests are attempting to show whether or not there was a similar pathway that the groups were following before they were treated. They do not tell us how this is occurring and if these trends are occurring for the same reasons. We cannot be sure that these trend will be upheld post-treatment since there are likely unobservable factors that impact groups differently.
 
 
+# 2.4 ---------------------------------------------------------------------
+
+
