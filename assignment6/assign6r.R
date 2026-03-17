@@ -135,6 +135,61 @@ mof_1 = feols(lemp ~ treated_post + lpop | year + countyreal, data=mp_2)
 # "The variable 'lpop' has been removed because of collinearity"
 modelsummary(mof_1, vcov="robust", stars=TRUE)
 
-#####
+# By treating them as the same, this implies that the different cohorts do not have important differences between them.
+
+out <- att_gt(
+  yname = "lemp",
+  gname = "first.treat",
+  idname = "countyreal",
+  tname = "year",
+  xformla = ~1,
+  data = mpdta,
+  est_method = "reg"
+)
+summary(out)
+
+# The ATT results are all negative, implying a negative relationship between a rise in minimum wage and the level of teen employment. Many effects appear to be similar to TWFE model but some years have a noticeably higher effect like 2006 & 2007 having ATT estimates of 0.1/10% whereas the TWFE has an estimate of 0.03/3%. 
+
+out_group <- aggte(out, type = "dynamic")
+summary(out_group)
+gg_group <- ggdid(out_group)
+print(gg_group)
+view(gg_group)
+ggsave("gg_group.png", gg_group, width=6,height=4)
+
+# The overall affect is that the ATT decreases with treatment by 7.7% as compared to TWFE's -3.7% estimate. 
+# The -2 period before treatment is at 0 but -3 and -1 are not at zero. δk ≈ 0 if parallel trends holds. I would not be confident that the parallel trends assumption holds here. The post-treatment shows not much of a response one year after but the biggest response 2 years after the treatment. 
+
+
+# 2.3 ---------------------------------------------------------------------
+
+oug <- att_gt(
+  yname = "lemp",
+  gname = "first.treat",
+  idname = "countyreal",
+  tname = "year",
+  xformla = ~1,
+  data = mpdta,
+  est_method = "reg",
+  bstrap = TRUE,
+  cband = TRUE,
+)
+summary(oug)
+
+# P-value for pre-test of parallel trends assumption:  0.16812
+# A lower p-value indicates that the null-hypothesis can be rejected. A higher p-value indicates that a null-hypothesis cannot be necessarily be rejected. 
+# I'm honestly quite confused about this because my intuition is that this is high for a p-value but the link you provided says "Here the parallel trends assumption would not be rejected at conventional significance levels." 
+
+
+oug_plot <- ggdid(oug)
+view(oug_plot)
+print(oug_plot)
+# are the pre treatment ATT(g,t) estimates close to zero and statistically indistinguishable from zero across all cohorts?
+
+# Group 2004 is always post-treatment which means that this cannot be analyzed properly.
+# Group 2006 is close to 0 pre-treatment. Group 2007 does get noticeably further away from 0 in 2004 and in 2006.
+
+# I'm not sure how far away from 0 it's 'okay' to be, but if it is noticeably straying away from the 0.0-line on the graph, the parallel trends assumptions wouldn't seem to hold. It also feels like an incomplete analysis with this data since there is no pre-treatment data for 2004. 
+# Pre-tests are attempting to show whether or not there was a similar pathway that the groups were following before they were treated. They do not tell us how this is occurring and if these trends are occurring for the same reasons. We cannot be sure that these trend will be upheld post-treatment since there are likely unobservable factors that impact groups differently.
 
 
