@@ -129,5 +129,12 @@ ggsave("teen employment over years.png", mpdt_plot, width=6,height=4)
 mp_2 <- mpdta
 mp_2 <- mp_2 %>% mutate(treated_post = ifelse(treat > 0 & year >= first.treat, "1", "0"))
 
+# Did treatment affect teen employment? 
 
-mof_1 = feols(lemp ~ 
+mof_1 = feols(lemp ~ treated_post + lpop | year + countyreal, data=mp_2)
+# "The variable 'lpop' has been removed because of collinearity"
+modelsummary(mof_1, vcov="robust", stars=TRUE)
+
+#####
+
+
