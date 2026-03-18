@@ -7,6 +7,7 @@ library(haven)
 library(fixest)
 library(plm)
 library(did)
+library(gridExtra)
 data(mpdta)
 
 # Class -------------------------------------------------------------------
@@ -157,8 +158,9 @@ print(gg_group)
 view(gg_group)
 ggsave("gg_group.png", gg_group, width=6,height=4)
 
-# The overall affect is that the ATT decreases with treatment by 7.7% as compared to TWFE's -3.7% estimate. 
-# The -2 period before treatment is at 0 but -3 and -1 are not at zero. δk ≈ 0 if parallel trends holds. I would not be confident that the parallel trends assumption holds here. The post-treatment shows not much of a response one year after but the biggest response 2 years after the treatment. 
+# The overall effect is that the ATT decreases with treatment by 7.7% as compared to TWFE's -3.7% estimate. 
+# The -2 period before treatment is at 0 but -3 and -1 are not at zero. δk ≈ 0 if parallel trends holds. I would not be confident that the parallel trends assumption holds here.
+# The post-treatment shows not much of a response one year after but the biggest response 2 years after the treatment. 
 
 
 # 2.3 ---------------------------------------------------------------------
@@ -184,7 +186,6 @@ summary(oug)
 oug_plot <- ggdid(oug)
 view(oug_plot)
 print(oug_plot)
-# are the pre treatment ATT(g,t) estimates close to zero and statistically indistinguishable from zero across all cohorts?
 
 # Group 2004 is always post-treatment which means that this cannot be analyzed properly.
 # Group 2006 is close to 0 pre-treatment. Group 2007 does get noticeably further away from 0 in 2004 and in 2006.
@@ -196,3 +197,52 @@ print(oug_plot)
 # 2.4 ---------------------------------------------------------------------
 
 
+ouc <- att_gt(
+  yname = "lemp",
+  gname = "first.treat",
+  idname = "countyreal",
+  tname = "year",
+  xformla = ~1,
+  data = mpdta,
+  est_method = "reg",
+  bstrap = TRUE,
+  cband = TRUE,
+  control_group = "notyettreated"
+)
+summary(ouc)
+
+ouc_dyn <- aggte(ouc, type = "dynamic")
+summary(ouc_dyn)
+
+# Overall ATT w/ never treated: -0.0772  
+# Overall ATT w/ not yet treated: -0.0774
+
+# They are very similar. They have the same sign and nearly the same value.
+
+oucplot <-ggdid(ouc_dyn)
+grid.arrange(oucplot, gg_group)
+# Not yet treated vs never treated
+# They look very similar. There is very little variation. 
+
+# These results suggest that anticipation is not relevant for this study since people behave similarly regardless of whether or not they will be treated. This could be in part due to a lack of knowing how/exactly when the policy would be enacted. Anticipation could be more relevant for studies where the participant is explicitly made aware of when and how they will be treated, and therefore the never-treated category would be preferable. 
+
+
+# 2.5 ---------------------------------------------------------------------
+
+
+# Naive TWFE compare the control to different stages of treatment separately. It will end up using the earlier treatments as "controls" for the later treatments, though. That is the "Forbidden Comparison" since it acts like already treated units are untreated. There may be different effects at different periods of treatment so we cannot expect trends to be similar simply because these are both groups that were treated, leading to improper calculations with the naive TWFE. 
+
+
+modelsummary(list(mof_1), vcov="robust", stars=TRUE)
+summary(out)
+summary(out_group)
+print(gg_group)
+
+view(gg_group)
+
+# -0.037 vs. -0.0772
+# The overall effect is that the ATT changes with treatment by -7.7% as compared to TWFE's -3.7% estimate.
+
+# From year -3 to 3, there is a -0.13 difference. There seems to be a higher magnitude than the TWFE would suggest, so I would lean towards using CS.
+
+# Miles Young Schroeder
