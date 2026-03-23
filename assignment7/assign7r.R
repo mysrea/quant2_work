@@ -1,6 +1,6 @@
 
 # Setup -------------------------------------------------------------------
-
+library(tidyr)
 library(dplyr)
 library(ggplot2)
 library(haven)
@@ -123,5 +123,36 @@ ggsave("world_color.png",width=10,height=5)
 
 
 # 2.2 ---------------------------------------------------------------------
+
+st_crs(events_sf)
+st_crs(world)
+
+evwo <- st_join(events_sf, world)
+
+nrow(events_sf)
+nrow(evwo)
+
+# st_join looks at the intersection of each dataframe to match them. It's important to check the projection system since they take the 3D nature of the Earth into consideration in different areas/plots in different ways.
+
+sum(is.na(evwo$name_long))
+1576/68354
+#  There are 1576 without a matching country, or about 2.3% of the events.
+# They may not match because (1) Borders can shift due to conflict (2) Events that are primarily fought on water
+
+# Count the number of events and total fatalities per country. Hint: filter out events with no matching country, then use group by() and summarise() with n() and sum(). Arrange by descending event count and print the top 10 (use st drop geometry() to get a clean table). In a comment, are the results consistent with your knowledge of contemporary armed conflicts?
+
+evwo2 = evwo %>% 
+  drop_na() %>%
+  group_by(name_long)%>%
+  summarise(number=n(),total=sum(fatalities))%>%
+  arrange(desc(total))
+
+print(head(st_drop_geometry(evwo2), 10))
+
+# I genuinely don't have much knowledge of contemporary armed conflicts, but I have heard of conflict in Rwanda so the high fatality count makes sense to me. 
+
+
+# 2.3 ---------------------------------------------------------------------
+
 
 
