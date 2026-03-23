@@ -1,15 +1,14 @@
 
 # Setup -------------------------------------------------------------------
 
-library(tidyverse)
-library(modelsummary)
-library(marginaleffects)
+library(dplyr)
+library(ggplot2)
 library(haven)
 library(fixest)
 library(plm)
-library(did)
 library(sf)
 library(spData)
+options(scale_colour_continuous = c("red", "blue", "green", "purple", "yellow"))
 
 
 # Classwork ---------------------------------------------------------------
@@ -95,5 +94,34 @@ ggsave("africa_gdp.pdf", width = 10, height = 5)
 
 
 # 2.1 ---------------------------------------------------------------------
+
+events <- read.csv("conflict_events.csv")
+class(events)
+events_sf <- st_as_sf(events,
+                   coords=c("longitude", "latitude"),
+                   crs = 4326)
+class(events_sf)
+st_crs(events_sf)
+
+# CRS 4326 is the coordinate system that our data uses. It's important to check the projection system since they take the 3D nature of the Earth into consideration in different areas/plots. Coords is telling R what to turn into a geometry column.
+
+
+nrow(events_sf)
+table(events_sf$event_type)
+# The state-based event type is most common. 
+
+
+
+p <- ggplot() +
+  geom_sf(data=world, color = "grey") +
+  geom_sf(data=events_sf, aes(fill = event_type, color=event_type))
+
+print(p)
+ggsave("world_color.png",width=10,height=5)
+
+# Conflict events are only visible in Africa. The conflict is spread across the continent although there are some larger gaps in the southwest and northwest. 
+
+
+# 2.2 ---------------------------------------------------------------------
 
 
