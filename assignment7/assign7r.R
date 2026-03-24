@@ -154,10 +154,30 @@ print(head(st_drop_geometry(evwo2), 10))
 
 # 2.3 ---------------------------------------------------------------------
 
-#Jointheeventcountsbacktotheworldpolygondata. Hint: firstusest on the event counts (since it is still an sf object), then use left drop geometry() join() to merge by country name. ReplaceNAvalueswith0forcountrieswithnoevents(seereplace from tidyr). Verify that the row count matches nrow(world).
 
-evwo_count <- 
+world_count <- world %>%
+  st_drop_geometry(evwo2) %>%
+  left_join(select(evwo2, name_long, number), by="name_long") %>%
+  replace_na(list(number=0))
 
 nrow(world)
-nrow(countworld)
+nrow(world_count)
 
+world_count2 <- world %>%
+  st_join(select(evwo2, name_long, number), left=TRUE) %>%
+  replace_na(list(number=0))
+
+ggplot(world_count2)+
+  geom_sf(data=world_count2, aes(fill=number))+
+  scale_fill_distiller(palette="Reds")
+ggsave("world_reds.png",width=10,height=5)
+# Overall the map does match the previous one considering that the events all take place in/around Africa. The only glaring difference is that there is a very light spot in the center which is mostly covered in the first event-level map.      
+
+ggplot(world_count2)+
+  geom_sf(data=world_count2, aes(fill=log1p(number)))+
+  scale_fill_distiller(palette="YlOrRd", direction = 1, name = "Log(events+1)")
+ggsave("world_logged.png",width=10,height=5)
+
+# Log transformations tend to reduce the impact of outliers. There is more nuance/variation in the colors with the log transformation. 
+
+# Miles Young Schroeder
