@@ -154,5 +154,10 @@ print(head(st_drop_geometry(evwo2), 10))
 
 # 2.3 ---------------------------------------------------------------------
 
+#Jointheeventcountsbacktotheworldpolygondata. Hint: firstusest on the event counts (since it is still an sf object), then use left drop geometry() join() to merge by country name. ReplaceNAvalueswith0forcountrieswithnoevents(seereplace from tidyr). Verify that the row count matches nrow(world).
 
+evwo_count <- 
+
+nrow(world)
+nrow(countworld)
 
