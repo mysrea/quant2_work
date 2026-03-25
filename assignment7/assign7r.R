@@ -180,4 +180,11 @@ ggsave("world_logged.png",width=10,height=5)
 
 # Log transformations tend to reduce the impact of outliers. There is more nuance/variation in the colors with the log transformation. 
 
+
+# 2.4  --------------------------------------------------------------------
+
+# Spatial data is complicated by the fact that conflicts between countries are not unlikely to occur around borders. Borders can change over time and can be unintuitive, making the decision of where to place a conflict difficult. I imagine that a researcher should make sure at the start of an analysis to check if there are border conflicts, and one possible way of dealing with this could be to name these events after the bordering countries when assigning their geometries.
+
+# These joins are made for different types of dataframes. St_join requires a geometry column and left_join must be for a regular dataframe. The joins allow you to combine dataframes together based on similar information- st joins based on geometry and left joins based on a provided characteristic. You should use them depending on what type of dataframe that you have. 
+
 # Miles Young Schroeder
