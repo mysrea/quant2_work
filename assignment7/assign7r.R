@@ -181,7 +181,7 @@ ggsave("world_logged.png",width=10,height=5)
 # Log transformations tend to reduce the impact of outliers. There is more nuance/variation in the colors with the log transformation. 
 
 
-# 2.4  --------------------------------------------------------------------
+# 2.5  --------------------------------------------------------------------
 
 # Spatial data is complicated by the fact that conflicts between countries are not unlikely to occur around borders. Borders can change over time and can be unintuitive, making the decision of where to place a conflict difficult. I imagine that a researcher should make sure at the start of an analysis to check if there are border conflicts, and one possible way of dealing with this could be to name these events after the bordering countries when assigning their geometries.
 
