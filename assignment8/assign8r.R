@@ -104,5 +104,28 @@ moran.test(world$sem_resid, listw = listw_dist, zero.policy = TRUE)
 # 2.1 ---------------------------------------------------------------------
 
 
+slm_21 = lagsarlm(lifeExp ~ log_gdp, data = world,
+                     listw = listw, zero.policy = TRUE)
+summary(slm_21)
+# Rho: -0.004
+# p-value: 0.805
+# Very small Rho, insignificant p-value. Log_gdp has a 5.55 estimate and is significant. 
+
+# It is a very small Rho which would indicate a minuscule amount of spatial outcome correlation, but the p-value is also insignificant. This does not suggest that outcome correlation is a noticeable issue based on the data. A rho above 0 indicates that the life expectancy of one area is related to the outcomes of its surrounding areas.
+
+# The slope of log_gdp is not the marginal effect of X on Y since a change in X on the equilibrium effects matrix propagates. It is reporting a network effect rather than an individual effect.
+
+
+# 2.2 ---------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
 
 
