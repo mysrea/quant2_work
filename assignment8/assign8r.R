@@ -8,7 +8,6 @@ library(spData)
 library(spdep)
 library(spatialreg)
 data(world)
-library(ggplot2)
 
 
 # Classwork ---------------------------------------------------------------
@@ -85,7 +84,6 @@ coords = st_centroid(st_geometry(world))
 nb_dist = dnearneigh(coords, d1 = 0, d2 = 300)
 summary(nb_dist)
 
-
 # Many more countries do not have neighbors here at 114 as compared to 16. This could be due to much larger countries having a further apart centroid from their edge. 
 
 listw_dist = nb2listw(nb_dist, style = "W", zero.policy = TRUE)
@@ -93,7 +91,7 @@ sem_dist = errorsarlm(lifeExp ~ log_gdp, data = world,
                       listw = listw_dist, zero.policy = TRUE)
 summary(sem_dist)
 
-# Here, lambda is 0.43 and statistically significant. This indicates that there is spatial correlation. The lambda is lower, 0.43 compared to 0.76. The neighborhood defined is clearly important to the way that 
+# Here, lambda is 0.43 and statistically significant. This indicates that there is spatial correlation. The lambda is lower, 0.43 compared to 0.76. The neighborhood defined is clearly important to the results. 
 
 world$sem_resid = residuals(sem_fit)
 moran.test(world$sem_resid, listw = listw_dist, zero.policy = TRUE)
@@ -102,7 +100,7 @@ moran.test(world$sem_resid, listw = listw_dist, zero.policy = TRUE)
 
 
 # 2.1 ---------------------------------------------------------------------
-
+# sem_fit = errorsarlm(lifeExp ~ log_gdp, data = world, listw = listw, zero.policy = TRUE)
 
 slm_21 = lagsarlm(lifeExp ~ log_gdp, data = world,
                      listw = listw, zero.policy = TRUE)
@@ -111,21 +109,48 @@ summary(slm_21)
 # p-value: 0.805
 # Very small Rho, insignificant p-value. Log_gdp has a 5.55 estimate and is significant. 
 
+#Distance weights
+slm_22 = lagsarlm(lifeExp ~ log_gdp, data = world,
+                  listw = listw_dist, zero.policy = TRUE)
+summary(slm_22)
+# Rho = 0.02; p-value=0.06
+
 # It is a very small Rho which would indicate a minuscule amount of spatial outcome correlation, but the p-value is also insignificant. This does not suggest that outcome correlation is a noticeable issue based on the data. A rho above 0 indicates that the life expectancy of one area is related to the outcomes of its surrounding areas.
 
 # The slope of log_gdp is not the marginal effect of X on Y since a change in X on the equilibrium effects matrix propagates. It is reporting a network effect rather than an individual effect.
 
 
 # 2.2 ---------------------------------------------------------------------
+set.seed(0703)
+
+#Spatial weights
+impacts(slm_21, listw = listw,  R = 500)
+# Direct: 5.548
+# Indirect: -0.024
+# Total: 5.2
+# OLS: 5.540
+# SLM: 5.548
+# Direct, OLS, SLM are all quite similar. 
+
+#Distance weights
+impacts(slm_22, listw = listw_dist, R = 500)
+#Direct=5.5, Indirect=0.12, Total=5.6
+
+# One country's GDP can affect the life expectancy of nearby countries. Here, there is a very small indirect effect which indicates there is not a significant amount of spillover and most of the change is direct. 
+
+# The first weights result in a total which is lower, whereas the distance weights result in a total which is higher. This is a combination of the indirect and direct effects. The indirect effects may shift depending on how much spillover effect there is into nearby countries and how the distance is calculated, as shown by the differences based on how I weighted the formula. 
 
 
+# 2.3 ---------------------------------------------------------------------
 
+AIC(ols_fit, sem_fit, slm_22)
+# ols_fit  3 965.9880
+# sem_fit  4 894.7021
+# slm_22   4 964.5393
 
+# The SEM model has the best fit. Since only LMerr was significant, this suggested using SEM as does this AIC test.
 
-
-
-
-
+# Moran's test determines the degree of spatial correlation and with OLS there is a 0.44 which would indicate that similar values tend to cluster but not to an extreme degree. Therefore the OLS assumption of independent observations is violated even if not at a high magnitude. For the spatial error model, the lambda is 0.76 which, since it is positive & significant, indicates that there is spatial correlation and using this model is the 'right idea'. With the LM tests, the SEM model has the best fit since only LMerr was significant. Across the different models, the log_gdp results are relatively similar - log_gdp was OLS: 5.5403, SEM = 3.95785, SLM = 5.5101. One country's GDP can affect the life expectancy of nearby countries. Here, there is a very small indirect effect which indicates there is not a significant amount of spillover and most of the change is direct. Queen contiguity counts all countries which share either a direct or diagonal connection which may obfuscate the reality of travel.
 
 
 
