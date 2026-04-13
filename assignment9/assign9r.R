@@ -1,6 +1,6 @@
 
 # Setup -------------------------------------------------------------------
-
+library(dplyr)
 library(carData)
 library(MASS)
 library(nnet)
@@ -12,6 +12,7 @@ library(survival)
 library(broom)
 data(BEPS)
 data(bioChemists)
+data(cancer, package="survival")
 
 
 # Classwork ---------------------------------------------------------------
@@ -136,4 +137,17 @@ predictions(m_nb, newdata = datagrid(fem = c("Men", "Women")))
 
 # 2.1 ---------------------------------------------------------------------
 
+lung$dead = lung$status- 1
 
+summary(lung)
+
+table(lung$dead)
+
+165/228
+# There are 228 observations across 11 variables. There are 63 people who died and 165 are censored. About 72% of patients are censored in the data which is a significant majority of the observations. This means that they survived to the end of the data recording though that is not a estimate of their subsequent health outcomes.
+
+survfit(Surv(time, dead)~1, data=lung)
+summary(km1)
+median(km1)
+
+# The estimated median survival time is 310. This means that the median person is expected to survive 310 days or around 10 months. 
