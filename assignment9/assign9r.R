@@ -166,3 +166,24 @@ ggplot(sfs_df, aes(time, estimate, color=strata))+
 survdiff(Surv(time, dead)~sex, data=lung)
   
 # The confidence intervals do overlap throughout the estimations. There is a cutoff where it appears that the men overall last longer than the women, though this is also where the most overlap is for the confidence intervals. The p=0.001 which indicates significance according to sex.  
+
+
+# 2.2 ---------------------------------------------------------------------
+
+coxph(Surv(time, status)~(age + sex + ph.ecog), data=lung)
+
+coxtest <- coxph(Surv(time, status)~(age + sex + ph.ecog), data=lung)
+
+
+# The hazard ratios are 1.01 for Age, 0.58 for Sex, and 1.59 for ECOG performance score. 
+# This means that being a woman increases your survival time. The p value for sex is 0.0009 which would indicate significance.
+
+#A higher performance score decreases survival. As you go from 0 to 1 on the test, your likelihood of survival decreases by about 59% (higher hazard). 
+
+cox.zph(coxtest)
+
+# The p-value is above 0.1 for each of the variables, indicating that none of them are statistically significant. This means that they are likely to be relatively consistent over time. If they were not this could mean that their effects change and become more relevant to survival as time goes on.
+
+# The Kaplan-Meier curves demonstrate a difference between sex as time goes on, although the confidence intervals do overlap. In the Cox test, sex and ph.ecog appear to be significant but age does not. Going from 1-2 with sex increases survival whereas increases in age and ECOG score worsen survival outcomes. The proportional hazards assumption holds based on the formal test. These tests appear to suggest that women have better outcomes overall, higher age worsens likelihood of survival, and cognitive performance is an indicator of the progression of the condition. 
+
+#Miles Young Schroeder
