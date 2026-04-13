@@ -151,3 +151,18 @@ summary(km1)
 median(km1)
 
 # The estimated median survival time is 310. This means that the median person is expected to survive 310 days or around 10 months. 
+
+survfit(Surv(time, dead)~sex, data=lung)
+
+sfs <- survfit(Surv(time, dead)~sex, data=lung) # 2=female
+sfs_df <- broom::tidy(sfs)
+sfs_df
+
+
+ggplot(sfs_df, aes(time, estimate, color=strata))+
+  geom_ribbon(aes(ymin=conf.low, ymax=conf.high), alpha = 0.2)+
+  geom_step()
+
+survdiff(Surv(time, dead)~sex, data=lung)
+  
+# The confidence intervals do overlap throughout the estimations. There is a cutoff where it appears that the men overall last longer than the women, though this is also where the most overlap is for the confidence intervals. The p=0.001 which indicates significance according to sex.  
